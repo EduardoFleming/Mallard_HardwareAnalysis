@@ -40,6 +40,8 @@ Também é possível iniciar diretamente com `python main.py`.
 
 A chave digitada fica apenas na sessão atual e não é gravada pelo aplicativo. Se quiser evitar digitá-la em cada execução, configure `GEMINI_API_KEY` no ambiente antes de abrir o app.
 
+O campo da chave mostra um indicador quando há uma chave digitada e exibe apenas seus últimos quatro caracteres. Na área do consultor, o aplicativo identifica o modelo configurado para a análise.
+
 Ao solicitar uma análise, os componentes detectados e as preferências preenchidas são enviados ao serviço Gemini. A coleta e o monitoramento de hardware acontecem localmente.
 
 ## Como usar o consultor
@@ -54,6 +56,8 @@ Ao solicitar uma análise, os componentes detectados e as preferências preenchi
 O Gemini auxilia na análise, mas não substitui a confirmação de compatibilidade. Soquete, BIOS, fonte, dimensões do gabinete e tipo de memória podem exigir conferência manual, especialmente em computadores OEM.
 
 O aplicativo **não consulta preços em tempo real**. Os botões de pesquisa abrem resultados de produtos; eles não são cotações e podem incluir ofertas indisponíveis ou incompatíveis. Confirme preço, estoque, vendedor e compatibilidade na loja antes de comprar.
+
+Cada clique em **Analisar meu computador** faz uma solicitação ao Gemini; o app não atualiza nem chama a IA em segundo plano. Se a API retornar limite de uso (`429`), o app informa o tempo de espera fornecido pelo Google. O limite depende da cota atual do projeto e do modelo.
 
 ## Estrutura do projeto
 

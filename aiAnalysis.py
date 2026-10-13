@@ -5,6 +5,9 @@ from urllib.parse import quote_plus
 import google.generativeai as genai
 
 
+GEMINI_MODEL = "gemini-3.5-flash-lite"
+
+
 def _extract_json(text):
     cleaned = text.strip()
     if cleaned.startswith("```"):
@@ -55,7 +58,7 @@ def _validate_analysis(data):
 def consultar_gemini(api_key, hardware, perfil, preferencias):
     """Gera um diagnóstico estruturado. Não consulta preços em tempo real."""
     genai.configure(api_key=api_key)
-    model = genai.GenerativeModel("gemini-3-flash-preview")
+    model = genai.GenerativeModel(GEMINI_MODEL)
 
     prompt = f"""
 Você é um consultor técnico de upgrades de computadores. Analise o hardware e o perfil
@@ -108,14 +111,13 @@ REGRAS:
 }}
 """
 
-    try:
-        response = model.generate_content(
-            prompt,
-            generation_config={"response_mime_type": "application/json", "temperature": 0.2},
-        )
-    except TypeError:
-        # Mantém compatibilidade com versões antigas do SDK sem suporte a JSON mode.
-        response = model.generate_content(prompt, generation_config={"temperature": 0.2})
+    response = model.generate_content(
+        prompt,
+        generation_config={"response_mime_type": "application/json", "temperature": 0.2},
+        # Não repetir automaticamente chamadas com falha: uma tentativa manual do
+        # usuário deve corresponder a, no máximo, uma solicitação à API.
+        request_options={"retry": None},
+    )
     if not getattr(response, "text", None):
         raise ValueError("A IA não retornou conteúdo. Tente novamente ou revise a chave/API.")
     return _validate_analysis(_extract_json(response.text))

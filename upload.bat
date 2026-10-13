@@ -1,6 +1,6 @@
 @echo off
 echo ==========================================
-echo Preparando para subir o Monitor PC...
+echo Preparando para subir o HardwareAnalysis...
 echo ==========================================
 
 git add .

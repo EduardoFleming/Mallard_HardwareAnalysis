@@ -1,6 +1,7 @@
 import importlib.util
 import os
 import platform
+import re
 import subprocess
 import sys
 from datetime import datetime
@@ -266,7 +267,13 @@ class HardwareAnalysisWindow(QMainWindow):
         self.api_key_input.setPlaceholderText("Chave Gemini")
         self.api_key_input.setEchoMode(QLineEdit.EchoMode.Password)
         self.api_key_input.setToolTip("A chave é mantida nesta sessão e não é gravada pelo aplicativo.")
+        self.api_key_input.textChanged.connect(self._update_key_status)
         side_layout.addWidget(self.api_key_input)
+        self.api_key_status = QLabel()
+        self.api_key_status.setObjectName("keyStatus")
+        self.api_key_status.setWordWrap(True)
+        self.api_key_status.setToolTip("Indicador local: mostra se foi digitada uma chave nesta sessão, sem exibir a chave completa.")
+        side_layout.addWidget(self.api_key_status)
         api_link = QPushButton("Criar ou gerenciar chave ↗")
         api_link.setObjectName("textButton")
         api_link.clicked.connect(lambda: QDesktopServices.openUrl(QUrl("https://aistudio.google.com/app/apikey")))
@@ -385,6 +392,12 @@ class HardwareAnalysisWindow(QMainWindow):
         form_layout = QVBoxLayout(form)
         form_layout.setContentsMargins(2, 2, 12, 18)
         form_layout.setSpacing(16)
+
+        model_info_card, model_info_layout = make_card("Modelo usado nesta análise", "Este identificador é enviado ao Gemini quando você solicita recomendações.")
+        self.model_name_label = QLabel(aiAnalysis.GEMINI_MODEL)
+        self.model_name_label.setObjectName("modelName")
+        model_info_layout.addWidget(self.model_name_label)
+        form_layout.addWidget(model_info_card)
 
         preferences_card, preferences_layout = make_card("Seu uso", "As perguntas mudam de acordo com o que você escolher.")
         fields = QGridLayout()
@@ -554,6 +567,9 @@ class HardwareAnalysisWindow(QMainWindow):
             QLabel#brand {{ color: #ffffff; font-size: 17px; font-weight: 700; letter-spacing: 0; }}
             QLabel#brandSub {{ color: #aab3b3; font-size: 10px; font-weight: 700; letter-spacing: 1.1px; }}
             QLabel#systemBadge {{ color: #bec8c6; font-size: 11px; padding: 10px 0; }}
+            QLabel#keyStatus {{ color: {colors['muted']}; font-size: 10px; padding-top: 1px; }}
+            QLabel#keyStatus[configured="true"] {{ color: #82c79a; }}
+            QLabel#keyStatus[configured="false"] {{ color: #d3a18b; }}
             QPushButton#navButton {{ text-align: left; color: #cbd1cf; background: transparent; border: 0; border-radius: 7px; padding: 11px 12px; font-weight: 550; }}
             QPushButton#navButton:hover {{ background: {colors['nav_hover']}; color: white; }}
             QPushButton#navButton:checked {{ color: #ffffff; background: {colors['nav_selected']}; border-left: 3px solid {colors['accent']}; padding-left: 9px; }}
@@ -569,6 +585,7 @@ class HardwareAnalysisWindow(QMainWindow):
             QLabel#hardwareValue {{ color: {colors['text']}; font-size: 16px; font-weight: 650; padding-top: 5px; }}
             QLabel#hardwareLine {{ color: {colors['text']}; padding: 3px 0; }}
             QLabel#cardHeading {{ color: {colors['text']}; font-weight: 650; font-size: 14px; }}
+            QLabel#modelName {{ color: {colors['accent']}; font-size: 15px; font-weight: 700; }}
             QLabel#metricValue {{ color: {colors['text']}; font-size: 29px; font-weight: 700; padding-top: 6px; }}
             QLabel#recommendationTitle {{ color: {colors['text']}; font-size: 16px; font-weight: 650; }}
             QLabel#budgetWarning {{ color: {colors['warning']}; background: {colors['warning_bg']}; border-radius: 5px; padding: 8px; }}
@@ -616,6 +633,21 @@ class HardwareAnalysisWindow(QMainWindow):
         self.api_key_input.blockSignals(True)
         self.api_key_input.setText(os.environ.get("GEMINI_API_KEY", ""))
         self.api_key_input.blockSignals(False)
+        self._update_key_status(self.api_key_input.text())
+
+    @Slot(str)
+    def _update_key_status(self, value):
+        key = value.strip()
+        configured = bool(key)
+        self.api_key_status.setProperty("configured", "true" if configured else "false")
+        if configured:
+            suffix = key[-4:] if len(key) >= 4 else "••••"
+            self.api_key_status.setText(f"✓ Chave preenchida · termina em …{suffix}")
+        else:
+            self.api_key_status.setText("Chave não informada")
+        self.api_key_status.style().unpolish(self.api_key_status)
+        self.api_key_status.style().polish(self.api_key_status)
+        self.api_key_status.update()
 
     def refresh_hardware(self):
         if self.hardware_thread and self.hardware_thread.isRunning():
@@ -827,7 +859,50 @@ class HardwareAnalysisWindow(QMainWindow):
     @Slot(str)
     def _analysis_failed(self, error):
         self.analyze_button.setEnabled(True)
-        self.analysis_status.setText(f"Não foi possível concluir a análise: {error}")
+        message = self._friendly_analysis_error(error)
+        self.analysis_status.setText(message)
+
+    @staticmethod
+    def _friendly_analysis_error(error):
+        text = str(error)
+        lowered = text.lower()
+        if "429" in lowered or "resource_exhausted" in lowered or "quota" in lowered:
+            retry_seconds = None
+            match = re.search(
+                r"retry in (?:(\d+)h)?(?:(\d+)m)?([0-9]+(?:\.[0-9]+)?)s",
+                text,
+                flags=re.IGNORECASE,
+            )
+            if match:
+                hours = int(match.group(1) or 0)
+                minutes = int(match.group(2) or 0)
+                seconds = int(float(match.group(3)))
+                retry_seconds = max(1, hours * 3600 + minutes * 60 + seconds)
+            else:
+                match = re.search(r"retry_delay\s*\{\s*seconds:\s*(\d+)", text, flags=re.IGNORECASE)
+                if match:
+                    retry_seconds = max(1, int(match.group(1)))
+            if retry_seconds:
+                hours, remainder = divmod(retry_seconds, 3600)
+                minutes, seconds = divmod(remainder, 60)
+                if hours:
+                    wait = f"{hours} h, {minutes} min"
+                elif minutes:
+                    wait = f"{minutes} min e {seconds} s"
+                else:
+                    wait = f"{seconds} s"
+                return (
+                    "O Google Gemini recusou a solicitação por limite de uso. "
+                    f"Aguarde pelo menos {wait} antes de tentar de novo. "
+                    "Se continuar acontecendo, confira as cotas do projeto ligado a esta chave no Google AI Studio."
+                )
+            return (
+                "O Google Gemini informou que a cota deste projeto ou modelo foi atingida. "
+                "Aguarde a cota indicada no AI Studio ser renovada e confira se a chave pertence ao projeto esperado."
+            )
+        if "503" in lowered or "unavailable" in lowered or "overloaded" in lowered:
+            return "O serviço Gemini está temporariamente indisponível ou sobrecarregado. Aguarde um pouco e tente novamente."
+        return f"Não foi possível concluir a análise: {text}"
 
     def _clear_layout(self, layout):
         while layout.count():
