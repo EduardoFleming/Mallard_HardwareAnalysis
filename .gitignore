@@ -9,7 +9,18 @@ venv/
 env/
 .venv/
 
-# Ignora arquivos com chaves e senhas (segurança)
+# Segredos locais
 .env
-config.json
+.env.*
+!.env.example
 .streamlit/secrets.toml
+
+# Saves locais do Mallard (preferências, peças informadas e histórico de análises)
+config.json
+historico*.json
+history*.json
+analysis-history*.json
+
+# Temporários e cópias locais
+*.tmp
+*.bak

@@ -1,68 +1,65 @@
-# HardwareAnalysis
+# Mallard · HardwareAnalysis
 
-Aplicativo desktop para conhecer os componentes do computador e receber recomendações de upgrade com ajuda do Gemini. O consultor considera o perfil de uso, o orçamento e as informações disponíveis sobre o hardware para explicar **o que pode valer a pena atualizar e o que confirmar antes de comprar**.
+Aplicativo desktop para ler informações reais do computador, acompanhar sensores e receber recomendações de upgrade com ajuda do Gemini. O novo frontend do Mallard é HTML/CSS/JavaScript dentro de uma janela PyWebview; as leituras e ações são atendidas pelo backend Python do HardwareAnalysis.
 
 ## Recursos
 
-- Tela de componentes detectados: processador, placa de vídeo, memória, placa-mãe, armazenamento e sistema operacional.
-- Monitoramento ao vivo de CPU e memória, com gráfico do último minuto.
-- Leitura opcional de uso e temperatura de GPU NVIDIA compatível.
-- Consultoria para jogos, trabalho e uso doméstico, com perguntas específicas para cada perfil.
-- Campos opcionais para orçamento, resolução, fonte, placa-mãe e outros dados que ajudam a conferir compatibilidade.
-- Recomendações priorizadas, com justificativa e pontos a verificar antes da compra.
-- Temas claro e escuro; a preferência fica salva entre execuções.
+- Componentes e armazenamento identificados pelo sistema, com opção de informar modelos que não puderam ser detectados.
+- Nível estimado do computador e pontos de atenção calculados com as métricas lidas localmente.
+- Guia didático de hardware que contextualiza os dados reais quando disponíveis.
+- Monitoramento local de CPU, memória, disco e, em hardware/driver compatíveis, GPU NVIDIA.
+- Consultor por perfil de uso, orçamento e preferências. Uma solicitação Gemini é feita somente ao clicar para analisar.
+- Resultado detalhado, recomendações, histórico persistente, marcação de upgrades e exportação de relatório HTML.
+- Temas, redução de movimento e preferências persistidos localmente.
 
-## Requisitos
+Os desenhos do mascote, analogias, explicações e temas são conteúdo estático da interface. Métricas, componentes, análises e histórico vêm do computador, do usuário ou do backend Gemini; não há modo de demonstração no aplicativo.
+
+## Requisitos e execução
 
 - Python 3.12 recomendado.
-- Conexão com a internet na primeira execução, para que o aplicativo instale as dependências que estiverem faltando.
-- Uma chave da API Gemini para usar o consultor de upgrades.
+- Windows, Linux ou macOS; a leitura de alguns componentes depende do sistema e dos drivers.
+- Uma chave da API Gemini para usar o consultor.
 
-O aplicativo foi planejado para Windows, Linux e macOS. A identificação de alguns componentes e sensores varia conforme o sistema, as permissões e os drivers instalados. A leitura de GPU atualmente usa NVML, voltada a placas NVIDIA compatíveis.
-
-## Instalação e execução
-
-Clone ou baixe o repositório, abra um terminal na pasta do projeto e execute:
+Execute na pasta do projeto:
 
 ```bash
 python app.py
 ```
 
-`app.py` inicia a interface desktop do HardwareAnalysis. Na primeira execução, o `main.py` verifica e instala as dependências Python necessárias usando o mesmo interpretador. No Windows, também tenta instalar WMI/PyWin32; NVML é instalado para habilitar sensores NVIDIA. Se a instalação automática falhar, o aplicativo informa o comando de instalação.
+O `app.py` verifica e instala as dependências necessárias usando o mesmo interpretador, e inicia o frontend local no PyWebview. Também é possível executar `python main.py`. Se a interface for aberta diretamente em um navegador comum, ela não usa dados simulados; sem a ponte Python, apresenta um erro de conexão.
 
-Também é possível iniciar diretamente com `python main.py`.
+## Chave do Gemini
 
-## Configurar o Gemini
+Crie uma chave no [Google AI Studio](https://aistudio.google.com/app/apikey) e informe-a no Consultor. Opcionalmente, configure `GEMINI_API_KEY` no ambiente antes de abrir o app. A chave fornecida na interface fica apenas na memória durante a sessão e nunca é salva junto às preferências ou ao histórico.
 
-1. Crie uma chave no [Google AI Studio](https://aistudio.google.com/app/apikey).
-2. Abra o HardwareAnalysis e informe a chave no campo **Chave Gemini**, na barra lateral.
-3. Acesse **Consultor de upgrades**, escolha o tipo de uso e clique em **Analisar meu computador**.
+O modelo é `gemini-3.5-flash-lite`, mantido da configuração atual do HardwareAnalysis. Cada clique no botão de análise faz, no máximo, uma chamada ao Gemini; o aplicativo não consulta a IA em segundo plano. Se o serviço informar limite de uso, a interface mostra a espera solicitada.
 
-A chave digitada fica apenas na sessão atual e não é gravada pelo aplicativo. Se quiser evitar digitá-la em cada execução, configure `GEMINI_API_KEY` no ambiente antes de abrir o app.
+Ao pedir uma análise, os componentes detectados e as preferências preenchidas são enviados ao Gemini. Coleta de hardware, monitoramento e persistência são locais. O modelo auxilia, mas não substitui a confirmação de compatibilidade física/BIOS/fonte. Os links de pesquisa de produto não são cotações em tempo real.
 
-O campo da chave mostra um indicador quando há uma chave digitada e exibe apenas seus últimos quatro caracteres. Na área do consultor, o aplicativo identifica o modelo configurado para a análise.
+## Dados locais
 
-Ao solicitar uma análise, os componentes detectados e as preferências preenchidas são enviados ao serviço Gemini. A coleta e o monitoramento de hardware acontecem localmente.
+Preferências, temas, conquistas e componentes informados manualmente são guardados em `config.json`; o histórico de análises fica em `historico.json`. Ambos ficam na pasta de configuração do usuário: `%APPDATA%\Mallard` no Windows ou `~/.config/Mallard` no Linux/macOS. Esses saves não são criados dentro do repositório. A chave Gemini nunca é armazenada nesses arquivos.
 
-## Como usar o consultor
+O `.gitignore` também exclui esses nomes caso arquivos locais sejam colocados na pasta do projeto. O `upload.bat` confere se saves já rastreados pelo Git impediriam essa proteção e pede confirmação explícita antes de preparar commit e push. O `.gitignore` não remove arquivos que já tenham sido enviados anteriormente; confira o histórico do repositório antes de compartilhar dados antigos.
 
-- Selecione **Jogos**, **Trabalho** ou **Uso doméstico**. As perguntas seguintes mudam conforme a escolha.
-- Em jogos, indique se o foco são competitivos leves, títulos AAA, jogos indie ou outro perfil. É possível informar um jogo específico.
-- Informe o orçamento se tiver um limite. Se ele não comportar uma melhoria que valha a pena, o consultor deve explicar isso sem recomendar ultrapassá-lo.
-- Os campos adicionais de compatibilidade são opcionais. Se não souber uma informação, deixe-a em branco; ela será desconsiderada.
+Para verificar localmente se saves/segredos estão ignorados:
 
-## Limites das recomendações e preços
+```bash
+git check-ignore -v config.json historico.json .env
+```
 
-O Gemini auxilia na análise, mas não substitui a confirmação de compatibilidade. Soquete, BIOS, fonte, dimensões do gabinete e tipo de memória podem exigir conferência manual, especialmente em computadores OEM.
+Não compartilhe `config.json` ou `historico.json`: o histórico pode conter componentes do computador, preferências e respostas de análises.
 
-O aplicativo **não consulta preços em tempo real**. Os botões de pesquisa abrem resultados de produtos; eles não são cotações e podem incluir ofertas indisponíveis ou incompatíveis. Confirme preço, estoque, vendedor e compatibilidade na loja antes de comprar.
+## Estrutura
 
-Cada clique em **Analisar meu computador** faz uma solicitação ao Gemini; o app não atualiza nem chama a IA em segundo plano. Se a API retornar limite de uso (`429`), o app informa o tempo de espera fornecido pelo Google. O limite depende da cota atual do projeto e do modelo.
+- `app.py`: entrada e preparação de dependências.
+- `main.py`: janela PyWebview e API Python consumida pelo frontend.
+- `ui/`: interface Mallard, sem payload de hardware ou resultados demonstrativos.
+- `hardwareInfo.py`, `hardwareMonitoring.py`: leitura de componentes e sensores locais.
+- `pcHealth.py`, `hardwareGuide.py`: classificação simples e explicações vinculadas à leitura.
+- `aiAnalysis.py`: chamada Gemini, regras do consultor e validação de resposta.
+- `analysisHistory.py`, `settingsStore.py`, `reportExport.py`: dados locais, preferências e exportação.
 
-## Estrutura do projeto
+## Publicação
 
-- `app.py`: ponto de entrada recomendado.
-- `main.py`: interface PySide6, verificação de dependências, formulários e apresentação das recomendações.
-- `hardwareInfo.py`: descoberta de componentes com caminhos específicos por sistema operacional.
-- `hardwareMonitoring.py`: métricas de CPU, memória e provedor NVIDIA NVML opcional.
-- `aiAnalysis.py`: instruções do consultor, validação da resposta JSON e links de pesquisa.
+`upload.bat` só deve ser usado depois de testar e decidir publicar. O script pergunta explicitamente antes de adicionar arquivos, criar commit e enviar o branch atual; arquivos cobertos pelo `.gitignore` ficam fora do envio.

@@ -1,0 +1,257 @@
+/* Os patos do Mallard: cada tema é um conjunto de variáveis aplicado com uma classe no <html>. */
+
+/* Mallard (padrão): pato-real macho */
+:root, .th-mallard {
+  color-scheme: dark;
+  --bg: #0B0F0D;
+  --s0: #0E1311;
+  --s1: #121915;
+  --s2: #18211C;
+  --s3: #1F2A24;
+  --line: rgba(255,255,255,.07);
+  --line2: rgba(255,255,255,.15);
+  --text: #EEF3EF;
+  --text2: #A9B5AE;
+  --muted: #8F9D95;
+  --faint: #6E7B74;
+  --acc: #4453E8;
+  --acc-hover: #5566F7;
+  --on-acc: #FFFFFF;
+  --acc-text: #9AA6FF;
+  --acc-soft: rgba(91,107,255,.15);
+  --acc-glow: rgba(68,83,232,.6);
+  --warn: #F2A93B;
+  --warn-soft: rgba(242,169,59,.12);
+  --crit: #FF6B6B;
+  --ok: #D5DED8;
+  --series2: #E9C23A;
+  --track: rgba(255,255,255,.08);
+  --input: #090C0B;
+  --d-body: #B3AEA4;
+  --d-head: #1F8A57;
+  --d-beak: #E9C23A;
+  --d-wing: #7A756C;
+  --d-spec: #4C5BE0;
+  --d-ring: #FFFFFF;
+  --d-line: transparent;
+  --d-eye: #0B0F0D;
+  --l-tile: #1F2A24;
+  --l-head: #2FA86B;
+  --l-beak: #E9C23A;
+  --l-ring: #FFFFFF;
+  --l-eye: #0B0F0D;
+}
+
+/* Pekin: branco */
+.th-pekin {
+  color-scheme: light;
+  --bg: #F5F3ED;
+  --s0: #FFFFFF;
+  --s1: #FFFFFF;
+  --s2: #F3F0E8;
+  --s3: #ECE8DD;
+  --line: rgba(28,27,24,.10);
+  --line2: rgba(28,27,24,.20);
+  --text: #1C1B18;
+  --text2: #57534A;
+  --muted: #68645A;
+  --faint: #8C887E;
+  --acc: #B9520B;
+  --acc-hover: #A3470A;
+  --on-acc: #FFFFFF;
+  --acc-text: #A84A0A;
+  --acc-soft: rgba(242,138,46,.14);
+  --acc-glow: rgba(185,82,11,.4);
+  --warn: #9A5B00;
+  --warn-soft: rgba(214,138,0,.12);
+  --crit: #C62828;
+  --ok: #3F3C35;
+  --series2: #8C877B;
+  --track: rgba(28,27,24,.08);
+  --input: #FFFFFF;
+  --d-body: #FFFFFF;
+  --d-head: #FFFFFF;
+  --d-beak: #F28A2E;
+  --d-wing: #EFEBE2;
+  --d-spec: #E4DFD3;
+  --d-ring: #FFFFFF;
+  --d-line: #C9C2B1;
+  --d-eye: #1C1B18;
+  --l-tile: #1C1B18;
+  --l-head: #FFFFFF;
+  --l-beak: #F28A2E;
+  --l-ring: #FFFFFF;
+  --l-eye: #1C1B18;
+}
+
+/* Fêmea: marrom e bege */
+.th-femea {
+  color-scheme: light;
+  --bg: #EFE7D9;
+  --s0: #F8F2E7;
+  --s1: #FBF7F0;
+  --s2: #F2EADC;
+  --s3: #E8DDCA;
+  --line: rgba(60,40,20,.12);
+  --line2: rgba(60,40,20,.24);
+  --text: #2A2017;
+  --text2: #5E4E3E;
+  --muted: #6B5A48;
+  --faint: #8E7C68;
+  --acc: #8A4A1C;
+  --acc-hover: #773F17;
+  --on-acc: #FFFFFF;
+  --acc-text: #85461A;
+  --acc-soft: rgba(138,74,28,.12);
+  --acc-glow: rgba(138,74,28,.4);
+  --warn: #8F5A00;
+  --warn-soft: rgba(196,128,20,.14);
+  --crit: #B3261E;
+  --ok: #3A2E22;
+  --series2: #3D57C9;
+  --track: rgba(60,40,20,.10);
+  --input: #FFFDF8;
+  --d-body: #A9805A;
+  --d-head: #8F6A47;
+  --d-beak: #E08A3A;
+  --d-wing: #7C5B3D;
+  --d-spec: #3D57C9;
+  --d-ring: #A9805A;
+  --d-line: transparent;
+  --d-eye: #1B130C;
+  --l-tile: #3A2A1C;
+  --l-head: #C29A70;
+  --l-beak: #E08A3A;
+  --l-ring: #C29A70;
+  --l-eye: #1B130C;
+}
+
+/* Cinzento: cinza */
+.th-cinzento {
+  color-scheme: dark;
+  --bg: #101215;
+  --s0: #14171B;
+  --s1: #181B20;
+  --s2: #1E2228;
+  --s3: #262B32;
+  --line: rgba(255,255,255,.07);
+  --line2: rgba(255,255,255,.15);
+  --text: #ECEEF1;
+  --text2: #A9AFB7;
+  --muted: #9097A1;
+  --faint: #6F7680;
+  --acc: #F2B53A;
+  --acc-hover: #FFC453;
+  --on-acc: #17130A;
+  --acc-text: #F5C15A;
+  --acc-soft: rgba(242,181,58,.14);
+  --acc-glow: rgba(242,181,58,.45);
+  --warn: #FF8A4C;
+  --warn-soft: rgba(255,138,76,.13);
+  --crit: #FF5C6C;
+  --ok: #D9DDE2;
+  --series2: #AEB5BE;
+  --track: rgba(255,255,255,.08);
+  --input: #0D0F12;
+  --d-body: #959BA3;
+  --d-head: #747A82;
+  --d-beak: #F2B53A;
+  --d-wing: #60666E;
+  --d-spec: #F1F1F1;
+  --d-ring: #959BA3;
+  --d-line: transparent;
+  --d-eye: #101215;
+  --l-tile: #262B32;
+  --l-head: #A3AAB2;
+  --l-beak: #F2B53A;
+  --l-ring: #A3AAB2;
+  --l-eye: #101215;
+}
+
+/* Cayuga: preto com brilho verde */
+.th-cayuga {
+  color-scheme: dark;
+  --bg: #060807;
+  --s0: #090C0A;
+  --s1: #0D110F;
+  --s2: #121815;
+  --s3: #18201B;
+  --line: rgba(255,255,255,.07);
+  --line2: rgba(255,255,255,.15);
+  --text: #EAF1EC;
+  --text2: #A0B0A6;
+  --muted: #889A8F;
+  --faint: #66766C;
+  --acc: #38C47A;
+  --acc-hover: #4ED68C;
+  --on-acc: #04110A;
+  --acc-text: #52DA92;
+  --acc-soft: rgba(56,196,122,.14);
+  --acc-glow: rgba(56,196,122,.45);
+  --warn: #F2A93B;
+  --warn-soft: rgba(242,169,59,.12);
+  --crit: #FF6B6B;
+  --ok: #D3DED7;
+  --series2: #8A9C91;
+  --track: rgba(255,255,255,.08);
+  --input: #050706;
+  --d-body: #1B211E;
+  --d-head: #1E3B2B;
+  --d-beak: #2E3430;
+  --d-wing: #141917;
+  --d-spec: #38C47A;
+  --d-ring: #1B211E;
+  --d-line: #3A4A41;
+  --d-eye: #8FA398;
+  --l-tile: #38C47A;
+  --l-head: #0D1310;
+  --l-beak: #2E3430;
+  --l-ring: #0D1310;
+  --l-eye: #38C47A;
+}
+
+/* Patinho Feio 1972: tema secreto */
+.th-patinho {
+  color-scheme: dark;
+  --bg: #020602;
+  --s0: #031004;
+  --s1: #041207;
+  --s2: #06180A;
+  --s3: #0A220F;
+  --line: rgba(51,255,102,.16);
+  --line2: rgba(51,255,102,.34);
+  --text: #33FF66;
+  --text2: #2AD957;
+  --muted: #22B54A;
+  --faint: #178A37;
+  --acc: #33FF66;
+  --acc-hover: #66FF8C;
+  --on-acc: #021004;
+  --acc-text: #33FF66;
+  --acc-soft: rgba(51,255,102,.12);
+  --acc-glow: rgba(51,255,102,.5);
+  --warn: #FFB000;
+  --warn-soft: rgba(255,176,0,.12);
+  --crit: #FF5A4D;
+  --ok: #33FF66;
+  --series2: #FFB000;
+  --track: rgba(51,255,102,.10);
+  --input: #010401;
+  --d-body: #041207;
+  --d-head: #041207;
+  --d-beak: #041207;
+  --d-wing: #041207;
+  --d-spec: #33FF66;
+  --d-ring: #33FF66;
+  --d-line: #33FF66;
+  --d-eye: #33FF66;
+  --l-tile: #041207;
+  --l-head: #33FF66;
+  --l-beak: #33FF66;
+  --l-ring: #041207;
+  --l-eye: #041207;
+}
+
+/* O tema secreto troca a fonte e simula as linhas de um monitor antigo. */
+.th-patinho body, .th-patinho body * { font-family: "IBM Plex Mono", monospace !important; text-shadow: 0 0 6px rgba(51, 255, 102, 0.35); }
+.th-patinho .shell { background-image: repeating-linear-gradient(0deg, rgba(0, 0, 0, 0.28) 0 1px, transparent 1px 3px); }

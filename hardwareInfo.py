@@ -166,3 +166,45 @@ def getSystemInfo():
         "logical_cpu_cores": psutil.cpu_count(logical=True),
         "physical_cpu_cores": psutil.cpu_count(logical=False),
     }
+
+
+_NOTEBOOK_CHASSIS = {8, 9, 10, 14, 30, 31, 32}
+_DESKTOP_CHASSIS = {3, 4, 5, 6, 7, 13, 15, 16, 24, 35, 36}
+
+
+def getDeviceType():
+    """Heurística simples de notebook/desktop baseada em WMI ou bateria."""
+    if platform.system() == "Windows":
+        client, _ = _windows_wmi()
+        try:
+            if client:
+                for enclosure in client.Win32_SystemEnclosure():
+                    chassis_types = set(enclosure.ChassisTypes or [])
+                    if chassis_types & _NOTEBOOK_CHASSIS:
+                        return "notebook"
+                    if chassis_types & _DESKTOP_CHASSIS:
+                        return "desktop"
+        except Exception:
+            pass
+    try:
+        battery = psutil.sensors_battery()
+    except Exception:
+        battery = None
+    return "notebook" if battery is not None else "desktop"
+
+
+def getDiskDetails():
+    disks = []
+    for partition in psutil.disk_partitions(all=False):
+        try:
+            usage = psutil.disk_usage(partition.mountpoint)
+        except (PermissionError, OSError):
+            continue
+        disks.append({
+            "device": (partition.device or partition.mountpoint).rstrip("\\/"),
+            "total_gb": round(usage.total / (1024**3), 1),
+            "used_gb": round(usage.used / (1024**3), 1),
+            "free_gb": round(usage.free / (1024**3), 1),
+            "percent": usage.percent,
+        })
+    return disks
