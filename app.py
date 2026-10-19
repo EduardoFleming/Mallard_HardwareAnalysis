@@ -38,7 +38,8 @@ def ensure_dependencies():
 
 
 if __name__ == "__main__":
-    ensure_dependencies()
+    if not getattr(sys, "frozen", False):
+        ensure_dependencies()
     from main import run_app
 
     raise SystemExit(run_app())

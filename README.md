@@ -28,6 +28,16 @@ python app.py
 
 O `app.py` verifica e instala as dependências necessárias usando o mesmo interpretador, e inicia o frontend local no PyWebview. Também é possível executar `python main.py`. Se a interface for aberta diretamente em um navegador comum, ela não usa dados simulados; sem a ponte Python, apresenta um erro de conexão.
 
+## Instalador Windows
+
+### [⬇ Baixar Mallard para Windows (64 bits)](https://github.com/EduardoFleming/Mallard_HardwareAnalysis/releases/latest/download/Mallard-Setup-3.0.0.exe)
+
+Baixe e abra o Setup para instalar. Ele cria atalhos no Menu Iniciar e, se o WebView2 estiver ausente, oferece baixá-lo durante a instalação. Depois disso, o Mallard abre como um aplicativo normal; não é necessário instalar Python, Git ou VS Code.
+
+O instalador atual foi gerado para Windows x64 e testado por instalação, abertura e desinstalação. Ele ainda não tem assinatura digital, então o SmartScreen pode exibir um aviso ao abrir até que o programa seja assinado por um certificado de publicação confiável. Os scripts e arquivos usados para construir o instalador ficam somente no checkout local e são ignorados pelo Git; o repositório contém o código-fonte do aplicativo, não os auxiliares de build nem o binário do instalador.
+
+O instalador não inclui sua chave Gemini, seu histórico nem suas preferências; cada usuário informa a própria chave, e saves existentes permanecem na pasta de dados do usuário durante atualizações e desinstalações. Se o histórico antigo estiver na pasta isolada do Python da Microsoft Store, o primeiro início copia `config.json` e `historico.json` para `%APPDATA%\Mallard`, sem apagar os originais.
+
 ## Chave do Gemini
 
 Crie uma chave no [Google AI Studio](https://aistudio.google.com/app/apikey) e informe-a no Consultor. Opcionalmente, configure `GEMINI_API_KEY` no ambiente antes de abrir o app. A chave fornecida na interface fica apenas na memória durante a sessão e nunca é salva junto às preferências ou ao histórico.

@@ -8,6 +8,18 @@ __pycache__/
 venv/
 env/
 .venv/
+.venv-build/
+build/
+dist/
+release/
+*.spec
+build-windows.ps1
+requirements-build.txt
+installer/
+
+# Auxiliares/artefatos do instalador (mantidos só no checkout de build)
+Mallard.spec
+Mallard-Setup-*.exe
 
 # Segredos locais
 .env
@@ -24,3 +36,4 @@ analysis-history*.json
 # Temporários e cópias locais
 *.tmp
 *.bak
+*.log

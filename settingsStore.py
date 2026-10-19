@@ -7,6 +7,7 @@ usuário informou à mão.
 
 import json
 import os
+import shutil
 from pathlib import Path
 
 DEFAULTS = {
@@ -27,7 +28,43 @@ def _config_path():
     base = os.environ.get("APPDATA") or str(Path.home() / ".config")
     folder = Path(base) / "Mallard"
     folder.mkdir(parents=True, exist_ok=True)
+    _migrate_store_python_saves(folder)
     return folder / "config.json"
+
+
+def _migrate_store_python_saves(destination):
+    """Copy saves out of the Microsoft Store Python sandbox when installing the app.
+
+    Store Python redirects %APPDATA% into LocalCache/Roaming. A bundled desktop
+    executable is not sandboxed, so it sees the ordinary roaming path instead.
+    Copy missing files only and leave the original saves in place as a backup.
+    """
+    local_app_data = os.environ.get("LOCALAPPDATA")
+    if os.name != "nt" or not local_app_data:
+        return
+
+    roots = Path(local_app_data) / "Packages"
+    if not roots.is_dir():
+        return
+
+    legacy_folders = sorted(
+        roots.glob("PythonSoftwareFoundation.Python.*/LocalCache/Roaming/Mallard"),
+        key=lambda path: path.stat().st_mtime,
+        reverse=True,
+    )
+    for name in ("config.json", "historico.json"):
+        target = destination / name
+        if target.exists():
+            continue
+        for legacy_folder in legacy_folders:
+            source = legacy_folder / name
+            if source.is_file():
+                try:
+                    shutil.copy2(source, target)
+                except OSError:
+                    # Do not prevent app startup if a sandbox file is inaccessible.
+                    pass
+                break
 
 
 def _clean(data):
