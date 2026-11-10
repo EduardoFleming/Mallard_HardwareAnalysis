@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="pt-BR" class="th-mallard">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Mallard · mini</title>
+  <link rel="stylesheet" href="css/fonts.css">
+  <link rel="stylesheet" href="css/themes.css">
+  <link rel="stylesheet" href="css/app.css">
+  <link rel="stylesheet" href="css/shell.css">
+</head>
+<body class="mini">
+  <div class="mini-win" id="mini" aria-label="Mini-modo do Mallard"></div>
+  <script src="js/icons.js"></script>
+  <script src="js/bridge.js"></script>
+  <script>
+    /* O mini-modo não carrega o app inteiro: só o necessário para desenhar o pato e falar com o Python. */
+    function esc(value) { return String(value ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c])); }
+    function fmt(value, digits = 1) { return Number(value).toFixed(digits).replace(".", ","); }
+    const STATE_TONE = { ok: "var(--acc-text)", warn: "var(--warn)", crit: "var(--crit)", off: "var(--muted)" };
+    const STATE_LABEL = { ok: "Normal", warn: "Alto", crit: "Crítico", off: "Sem sensor" };
+    function stateChip(level, label) {
+      return `<span class="st" style="--tone:${STATE_TONE[level]}">${icon(`st-${level}`, 13, 3)}${esc(label || STATE_LABEL[level])}</span>`;
+    }
+  </script>
+  <script src="js/mini.js"></script>
+</body>
+</html>

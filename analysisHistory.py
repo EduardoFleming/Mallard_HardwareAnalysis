@@ -77,9 +77,50 @@ def setUpgradeDone(entry_id, index, done):
     for entry in entries:
         if entry.get("id") == entry_id:
             feitos = entry.setdefault("feitos", [])
+            quando = entry.setdefault("feitos_em", [])
             while len(feitos) <= index:
                 feitos.append(False)
+            while len(quando) < len(feitos):
+                quando.append(None)
             feitos[index] = bool(done)
+            quando[index] = datetime.now().date().isoformat() if done else None
+            _save(entries)
+            return entry
+    return None
+
+
+def setShopping(entry_id, index, include, price=None):
+    if index < 0 or index >= 3:
+        return None
+    if not isinstance(price, (int, float)) or isinstance(price, bool) or price < 0 or price > 1_000_000:
+        price = None
+    entries = loadHistory()
+    for entry in entries:
+        if entry.get("id") == entry_id:
+            purchases = entry.setdefault("compras", {})
+            purchases[str(index)] = {
+                "incluir": bool(include),
+                "preco": None if price is None else round(float(price), 2),
+            }
+            _save(entries)
+            return entry
+    return None
+
+
+def setShopping(entry_id, index, include, price=None):
+    """Guarda seleção e preço digitado pelo usuário para a lista de compra."""
+    if index < 0 or index >= 3:
+        return None
+    if not isinstance(price, (int, float)) or isinstance(price, bool) or price < 0 or price > 1_000_000:
+        price = None
+    entries = loadHistory()
+    for entry in entries:
+        if entry.get("id") == entry_id:
+            compras = entry.setdefault("compras", {})
+            compras[str(index)] = {
+                "incluir": bool(include),
+                "preco": None if price is None else round(float(price), 2),
+            }
             _save(entries)
             return entry
     return None

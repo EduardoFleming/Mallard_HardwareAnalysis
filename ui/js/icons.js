@@ -40,6 +40,20 @@ const ICONS = {
   "trophy": "<path d=\"M8 21h8M12 17v4M7 4h10v5a5 5 0 0 1-10 0z\"></path><path d=\"M17 5h3a3 3 0 0 1-3 4M7 5H4a3 3 0 0 0 3 4\"></path>"
 };
 
+/* Ícones das novidades: mini-modo, alfinete, ventoinha, lista e os símbolos de estado. */
+Object.assign(ICONS, {
+  "mini": "<rect x=\"3\" y=\"5\" width=\"18\" height=\"14\" rx=\"2\"></rect><rect x=\"12\" y=\"11\" width=\"7\" height=\"6\" rx=\"1\"></rect>",
+  "pin": "<path d=\"M12 17v5M8 3h8l-1 6 3 3.5H6L9 9z\"></path>",
+  "shrink": "<path d=\"M4 14h6v6M20 10h-6V4M14 10l7-7M3 21l7-7\"></path>",
+  "expand": "<path d=\"M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5\"></path>",
+  "fan": "<circle cx=\"12\" cy=\"12\" r=\"1.8\"></circle><path d=\"M12 10.2C12 5 17 4 17 7s-3 3.2-5 3.2zM13.8 12c5.2 0 6.2 5 3.2 5s-3.2-3-3.2-5zM12 13.8c0 5.2-5 6.2-5 3.2s3-3.2 5-3.2zM10.2 12C5 12 4 7 7 7s3.2 3 3.2 5z\"></path>",
+  "cart": "<path d=\"M3 4h2.5l2.2 11h10.6L21 7H6.2\"></path><circle cx=\"9\" cy=\"19\" r=\"1.4\"></circle><circle cx=\"17\" cy=\"19\" r=\"1.4\"></circle>",
+  "st-ok": "<path d=\"M5 12.5l4.5 4.5L19 7.5\"></path>",
+  "st-warn": "<path d=\"M12 6.5v7M12 17.6h.01\"></path>",
+  "st-crit": "<path d=\"M7 7l10 10M17 7L7 17\"></path>",
+  "st-off": "<path d=\"M6.5 12h11\"></path>"
+});
+
 function icon(name, size = 20, stroke = 1.8) {
   return `<svg width="${size}" height="${size}" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="${stroke}" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0">${ICONS[name] || ""}</svg>`;
 }

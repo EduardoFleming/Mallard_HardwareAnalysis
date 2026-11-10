@@ -21,6 +21,13 @@ function isUnknown(value) {
   const text = String(value ?? "").trim().toLowerCase();
   return !text || text.startsWith("não identificado");
 }
+/* Estado em texto + símbolo (nunca só cor): ok = Normal, warn = Alto, crit = Crítico, off = sem leitura. */
+const STATE_TONE = { ok: "var(--acc-text)", warn: "var(--warn)", crit: "var(--crit)", off: "var(--muted)" };
+const STATE_LABEL = { ok: "Normal", warn: "Alto", crit: "Crítico", off: "Sem sensor" };
+function stateChip(level, label) {
+  const tone = STATE_TONE[level] || STATE_TONE.off;
+  return `<span class="st" style="--tone:${tone}">${icon(`st-${level in STATE_TONE ? level : "off"}`, 13, 3)}${esc(label || STATE_LABEL[level])}</span>`;
+}
 function linkGo(label, attrs) {
   return `<button type="button" class="link-go" ${attrs}>${esc(label)}<span class="arr">${icon("arrow", 16)}</span></button>`;
 }
@@ -36,7 +43,18 @@ function pageHeader(kicker, title, subtitle, right = "") {
 /* ---------- Aplicativo ---------- */
 const App = {
   state: { settings: null, hardware: null, page: null, info: null, ai: { has_key: false }, request: null },
-  navOf: { analyzing: "advisor", result: "advisor", error: "advisor" },
+  navOf: { analyzing: "advisor", result: "advisor", error: "advisor", cleanup: "tools", startup: "tools", battery: "tools", temperature: "tools" },
+  TABS: [
+    { id: "computer", label: "Meu PC" }, { id: "guide", label: "Entender" }, { id: "simulator", label: "Simulador" },
+    { id: "monitor", label: "Monitoramento" }, { id: "journal", label: "Diário" }, { id: "gamecheck", label: "Vai rodar?" },
+    { id: "advisor", label: "Consultor" }, { id: "history", label: "Histórico" },
+  ],
+  TOOLS: [
+    { id: "cleanup", icon: "broom", label: "Limpeza", hint: "Libera espaço no disco" },
+    { id: "startup", icon: "play", label: "Inicialização", hint: "Programas que abrem com o Windows" },
+    { id: "temperature", icon: "thermo", label: "Temperatura", hint: "Processador, disco, vídeo e ventoinhas" },
+    { id: "battery", icon: "plug", label: "Bateria", hint: "Saúde da bateria do notebook" },
+  ],
   pages: {},
   listeners: {},
   logoClicks: 0,
@@ -47,20 +65,20 @@ const App = {
   emit(event, data) { (this.listeners[event] || []).forEach((handler) => handler(data)); },
 
   async start() {
-    document.querySelectorAll(".nav-btn").forEach((button) => {
-      button.insertAdjacentHTML("afterbegin", icon(button.dataset.icon, 19));
-    });
-    document.getElementById("settings-link-label").insertAdjacentHTML("afterbegin", icon("gear", 17));
-    document.getElementById("brand-logo").innerHTML = logoSymbol(40, 10);
+    document.getElementById("settings-btn").innerHTML = icon("gear", 18);
+    document.getElementById("brand-logo").innerHTML = `${logoSymbol(38, 10)}<span class="brand-name">Mallard</span>`;
+    this.renderTabs();
 
     document.addEventListener("click", (event) => {
       const target = event.target.closest("[data-page]");
-      if (target && !target.closest(".page")) this.go(target.dataset.page);
+      if (target) this.go(target.dataset.page);
       const go = event.target.closest("[data-go]");
       if (go) this.go(go.dataset.go, { part: go.dataset.part });
       const url = event.target.closest("[data-url]");
       if (url) { event.preventDefault(); Bridge.call("open_url", url.dataset.url); }
+      if (!event.target.closest(".tools")) this.toggleTools(false);
     });
+    document.addEventListener("keydown", (event) => { if (event.key === "Escape") this.toggleTools(false); });
     document.getElementById("brand-logo").addEventListener("click", () => this.logoClick());
 
     Object.values(this.pages).forEach((page) => page.init && page.init());
@@ -73,27 +91,68 @@ const App = {
     }
     this.applyTheme(this.state.settings.theme);
     this.applyReduceMotion(this.state.settings.reduce_motion);
-    this.renderDuckPicker();
-    this.go("computer");
 
-    Bridge.call("get_app_info").then((info) => {
-      this.state.info = info;
-      document.getElementById("version-label").textContent = `${info.os} · v${info.version}`;
-    }).catch((error) => this.showFatal(error));
+    try {
+      this.state.info = await Bridge.call("get_app_info");
+    } catch (error) {
+      this.showFatal(error);
+      return;
+    }
     const loaded = await this.loadHardware(false);
     if (!loaded) return;
     await this.refreshAi();
+    await this.refreshBattery();
+
+    if (!this.state.settings.onboarded && this.pages.intro) this.pages.intro.open();
+    else this.go("computer");
   },
 
   showFatal(error) {
     const main = document.getElementById("content");
     main.innerHTML = `<section class="page active" style="display:flex;max-width:760px;margin:10vh auto;gap:18px">
       <span class="kicker">INICIALIZAÇÃO</span><h1 class="page-title">Não foi possível iniciar o Mallard</h1>
-      <p class="muted">O backend Python não conseguiu carregar os dados reais do computador. Feche esta janela e inicie novamente com <code>python app.py</code>.</p>
+      <p class="muted">O backend Python não conectou à interface. Feche esta janela e inicie o Mallard pelo atalho ou por <code>python app.py</code>.</p>
       <pre class="panel pad" style="white-space:pre-wrap">${esc(error)}</pre></section>`;
   },
 
-  /* ---------- IA (a chave fica só na memória do Python) ---------- */
+  /* ---------- Abas ---------- */
+  renderTabs() {
+    const tabs = document.getElementById("tabs");
+    tabs.innerHTML = this.TABS.map((tab) => `<button type="button" class="tab" data-page="${tab.id}">${esc(tab.label)}</button>`).join("") + `
+      <div class="tools"><button type="button" class="tab" id="tools-btn" aria-haspopup="true" aria-expanded="false">Ferramentas<span style="display:flex">${icon("chev", 15)}</span></button>
+        <div class="tools-menu" id="tools-menu" hidden>${this.TOOLS.map((tool) => `<button type="button" data-page="${tool.id}" data-tool="${tool.id}">
+          <span style="color:var(--acc-text);display:flex">${icon(tool.icon, 20)}</span><span><b>${esc(tool.label)}</b><small>${esc(tool.hint)}</small></span></button>`).join("")}</div></div>`;
+    document.getElementById("tools-btn").addEventListener("click", (event) => { event.stopPropagation(); this.toggleTools(); });
+  },
+  toggleTools(force) {
+    const menu = document.getElementById("tools-menu");
+    const button = document.getElementById("tools-btn");
+    if (!menu) return;
+    const open = force === undefined ? menu.hidden : force;
+    menu.hidden = !open;
+    button.setAttribute("aria-expanded", String(open));
+  },
+  /* A bateria só faz sentido em notebook: em desktop o item some do menu. */
+  async refreshBattery() {
+    try { this.state.battery = await Bridge.call("get_battery", false); } catch (error) { this.state.battery = { supported: false }; }
+    const item = document.querySelector('[data-tool="battery"]');
+    if (item) item.hidden = !this.state.battery.supported;
+  },
+
+  async setFlag(key, value) {
+    this.state.settings = await Bridge.call("save_settings", { [key]: !!value });
+    return this.state.settings;
+  },
+
+  async refreshSettings() {
+    this.state.settings = await Bridge.call("get_settings");
+    this.applyTheme(this.state.settings.theme);
+    this.applyReduceMotion(this.state.settings.reduce_motion);
+    this.emit("settings", this.state.settings);
+    return this.state.settings;
+  },
+
+  /* ---------- IA (chave protegida pelo backend para o usuário atual) ---------- */
   async refreshAi() {
     this.state.ai = await Bridge.call("get_ai_status");
     this.renderAiStatus();
@@ -115,23 +174,21 @@ const App = {
     document.getElementById("ai-dot").style.background = ok ? "var(--acc-text)" : "var(--warn)";
     const text = document.getElementById("ai-text");
     text.textContent = ok ? `IA: pronta${this.state.ai.masked ? ` · chave ${this.state.ai.masked}` : " nesta sessão"}` : "IA: chave não informada";
-    text.style.color = ok ? "var(--text2)" : "var(--warn)";
   },
 
   /* ---------- Conquista: virou cisne ---------- */
   swanMoment() {
     const logo = document.getElementById("brand-logo");
-    logo.innerHTML = `<span class="pop" style="display:flex">${swanSymbol(40, 10)}</span>`;
+    const name = '<span class="brand-name">Mallard</span>';
+    logo.innerHTML = `<span class="pop" style="display:flex">${swanSymbol(38, 10)}</span>${name}`;
     clearTimeout(this.swanTimer);
-    this.swanTimer = setTimeout(() => { logo.innerHTML = logoSymbol(40, 10); }, 4500);
+    this.swanTimer = setTimeout(() => { logo.innerHTML = `${logoSymbol(38, 10)}${name}`; }, 4500);
   },
 
   async loadHardware(refresh) {
     this.emit("hardware-loading");
     try {
       this.state.hardware = await Bridge.call("get_hardware", !!refresh);
-      const type = this.state.hardware.tipo_de_maquina === "notebook" ? "Notebook" : "Desktop";
-      document.getElementById("device-label").textContent = `${type} · ${this.state.hardware.sistema.operating_system}`;
       this.emit("hardware", this.state.hardware);
       return true;
     } catch (error) {
@@ -151,13 +208,19 @@ const App = {
     this.state.page = id;
     document.getElementById(`page-${id}`).classList.add("active");
     const navId = this.navOf[id] || id;
-    document.querySelectorAll(".nav-btn, .settings-link").forEach((button) => {
+    document.querySelectorAll(".tab[data-page]").forEach((button) => {
       const active = button.dataset.page === navId;
       button.classList.toggle("active", active);
       if (active) button.setAttribute("aria-current", "page"); else button.removeAttribute("aria-current");
     });
+    document.getElementById("tools-btn").classList.toggle("active", navId === "tools");
+    document.querySelectorAll("[data-tool]").forEach((item) => item.classList.toggle("active", item.dataset.tool === id));
+    document.getElementById("settings-btn").classList.toggle("active", id === "settings");
+    this.toggleTools(false);
+    if (typeof Help !== "undefined") Help.close();
     document.getElementById("content").scrollTop = 0;
     this.pages[id].show && this.pages[id].show(options);
+    if (typeof Help !== "undefined") Help.onPage(id);
   },
 
   /* ---------- Os patos ---------- */
@@ -168,7 +231,6 @@ const App = {
     const theme = this.availableThemes().find((item) => item.id === id) || THEMES[0];
     document.documentElement.className = document.documentElement.className.replace(/\bth-\S+/g, "").trim();
     document.documentElement.classList.add(`th-${theme.id}`);
-    document.getElementById("duck-name").textContent = theme.name;
   },
   async setTheme(id) {
     if (!this.state.settings) return;
@@ -179,20 +241,8 @@ const App = {
     if (before < 5 && normal(tried) >= 5) setTimeout(() => this.toast("Conquista desbloqueada: Bando completo"), 400);
     this.state.settings.theme = id;
     this.applyTheme(id);
-    this.renderDuckPicker();
     this.emit("theme", id);
     this.state.settings = await Bridge.call("save_settings", { theme: id, tried_themes: [...tried] });
-  },
-  renderDuckPicker() {
-    const current = this.state.settings.theme;
-    document.getElementById("duck-picker").innerHTML = this.availableThemes().map((theme) => `
-      <button type="button" class="swatch ${theme.id === current ? "active" : ""}" data-theme="${theme.id}"
-        aria-pressed="${theme.id === current}" aria-label="Usar o tema ${esc(theme.name)}" title="${esc(theme.name)}">
-        <span class="swatch-dot" style="background:${theme.plume}"><span class="swatch-beak" style="background:${theme.beak}"></span></span>
-      </button>`).join("");
-    document.querySelectorAll("#duck-picker .swatch").forEach((button) => {
-      button.addEventListener("click", () => this.setTheme(button.dataset.theme));
-    });
   },
   applyReduceMotion(on) {
     document.documentElement.classList.toggle("reduce-motion", !!on);
@@ -213,9 +263,7 @@ const App = {
     const first = !this.state.settings.unlocked_1972;
     this.state.settings = await Bridge.call("save_settings", { unlocked_1972: true });
     await this.setTheme("patinho");
-    this.toast(first
-      ? "Skin secreta desbloqueada! Patinho Feio (1972) está no seletor de temas e em Configurações."
-      : "Quack! Skin Patinho Feio ativada.");
+    this.toast(first ? "Tema secreto desbloqueado: Patinho Feio, 1972" : "Quack! De volta a 1972.");
   },
 
   /* ---------- Avisos ---------- */

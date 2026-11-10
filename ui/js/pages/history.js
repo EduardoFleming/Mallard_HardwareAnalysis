@@ -4,6 +4,7 @@ App.register("history", (() => {
   let entries = [];
   let selected = null;
   let confirmDelete = false;
+  let view = "trail";   // "trail" (análises) ou "before" (antes e depois do upgrade)
 
   function when(iso) {
     const d = new Date(iso);
@@ -67,6 +68,11 @@ App.register("history", (() => {
   function beforeAfter(current, previous) {
     if (!previous) return `<span class="faint" style="font-size:14px">Primeira pegada da trilha: ainda não há com o que comparar.</span>`;
     const pct = (v) => (v === null || v === undefined ? "—" : `${fmt(v)}%`);
+    const ramPct = (e) => e.pecas.memoria_uso_percent;
+    const diskPct = (e) => {
+      const disk = systemDisk(e);
+      return disk && disk.percent;
+    };
     const delta = (a, b) => {
       if (a == null || b == null) return ["Sem dado", "var(--muted)"];
       const d = b - a;
@@ -77,8 +83,8 @@ App.register("history", (() => {
     const lvA = (previous.resultado || {}).level_now ?? 1, lvB = (current.resultado || {}).level_now ?? 1;
     const samePerfil = previous.perfil === current.perfil;
     const cards = [
-      ["Memória em uso", pct(previous.pecas.memoria_uso_percent), pct(current.pecas.memoria_uso_percent), ...delta(previous.pecas.memoria_uso_percent, current.pecas.memoria_uso_percent)],
-      ["Disco do sistema", pct(dA && dA.percent), pct(dB && dB.percent), ...delta(dA && dA.percent, dB && dB.percent)],
+      ["Memória em uso", pct(ramPct(previous)), pct(ramPct(current)), ...delta(ramPct(previous), ramPct(current))],
+      ["Disco do sistema", pct(diskPct(previous)), pct(diskPct(current)), ...delta(diskPct(previous), diskPct(current))],
       ["Nível", LEVEL_NAMES[lvA], LEVEL_NAMES[lvB], lvA === lvB ? "Mesmo nível" : !samePerfil ? "Perfis diferentes" : lvB > lvA ? "Subiu" : "Desceu", "var(--muted)"],
     ];
     return `<span class="label" style="font-size:12px">Antes e depois · comparado a ${when(previous.data).date}</span>
@@ -113,10 +119,25 @@ App.register("history", (() => {
       </div></section>`;
   }
 
+  function views() {
+    return `<div class="seg" role="group" aria-label="O que mostrar"><button type="button" data-view="trail" aria-pressed="${view === "trail"}">Análises</button>
+      <button type="button" data-view="before" aria-pressed="${view === "before"}">Antes e depois</button></div>`;
+  }
+
+  function bindViews() {
+    root().querySelectorAll("[data-view]").forEach((b) => b.addEventListener("click", () => { view = b.dataset.view; render(); }));
+  }
+
   function render() {
     const right = entries.length
       ? `<span class="row num" style="gap:10px;min-height:36px;padding:0 14px;border-radius:999px;background:var(--s1);border:1px solid var(--line);font-size:15px;font-weight:700;color:var(--text2)"><span style="color:var(--acc-text);display:flex">${footprint(18)}</span>${entries.length} ${entries.length === 1 ? "pegada" : "pegadas"} desde ${when(entries[entries.length - 1].data).date}</span>`
       : "";
+    if (view === "before") {
+      root().innerHTML = pageHeader("TRILHA", "Antes e depois", "A semana antes da peça contra a semana depois, com o que o Diário anotou.", right) + views() + `<div id="ba-host"></div>`;
+      bindViews();
+      BeforeAfter.mount(document.getElementById("ba-host"));
+      return;
+    }
     const body = entries.length
       ? `<div class="row" style="flex-wrap:wrap;gap:20px;align-items:flex-start">${trail()}${detail()}</div>`
       : `<section class="panel pad in stack" style="align-items:center;text-align:center;gap:12px;padding:40px">
@@ -124,7 +145,8 @@ App.register("history", (() => {
           <h2 class="section-title">Ainda não há pegadas</h2>
           <span class="muted">Cada análise do Consultor vira uma pegada aqui, para você comparar o antes e o depois.</span>
           <button type="button" class="btn btn-primary" data-go="advisor">Fazer a primeira análise</button></section>`;
-    root().innerHTML = pageHeader("TRILHA", "Histórico de análises", "Cada pegada é uma consulta ao Mallard. Clique para rever.", right) + achievements() + body;
+    root().innerHTML = pageHeader("TRILHA", "Histórico de análises", "Cada pegada é uma consulta ao Mallard. Clique para rever.", right) + views() + achievements() + body;
+    bindViews();
     root().querySelectorAll("[data-entry]").forEach((b) => b.addEventListener("click", () => { selected = b.dataset.entry; confirmDelete = false; render(); }));
     const openBtn = document.getElementById("hist-open");
     if (openBtn) openBtn.addEventListener("click", () => App.go("result", { id: selected }));
@@ -155,6 +177,6 @@ App.register("history", (() => {
 
   return {
     init() { App.on("history-changed", () => { if (App.state.page === "history") load(); }); },
-    show() { confirmDelete = false; load(); },
+    show(options) { confirmDelete = false; view = options && options.part === "before" ? "before" : "trail"; load(); },
   };
 })());

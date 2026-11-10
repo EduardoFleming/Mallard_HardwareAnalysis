@@ -12,13 +12,13 @@ env/
 build/
 dist/
 release/
+Mallard.spec
 *.spec
 build-windows.ps1
 requirements-build.txt
 installer/
 
 # Auxiliares/artefatos do instalador (mantidos só no checkout de build)
-Mallard.spec
 Mallard-Setup-*.exe
 
 # Segredos locais
@@ -27,11 +27,19 @@ Mallard-Setup-*.exe
 !.env.example
 .streamlit/secrets.toml
 
+# Arquivo mock de frontmallard não é usado pelo aplicativo
+ui/js/mockData.js
+
 # Saves locais do Mallard (preferências, peças informadas e histórico de análises)
 config.json
 historico*.json
 history*.json
 analysis-history*.json
+journal.json
+
+# Credenciais protegidas e dados de usuário nunca devem entrar no repositório
+gemini-key.dpapi
+*.dpapi
 
 # Temporários e cópias locais
 *.tmp

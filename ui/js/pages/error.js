@@ -2,7 +2,7 @@
 App.register("error", (() => {
   const root = () => document.getElementById("page-error");
   const ERRORS = {
-    sem_chave: ["Falta a chave do Gemini", "O consultor usa o Google Gemini. A chave é gratuita e fica só na memória até você fechar o Mallard.", "key"],
+    sem_chave: ["Falta a chave do Gemini", "O consultor usa o Google Gemini. No Windows, a chave fica salva com criptografia na sua conta.", "key"],
     chave_invalida: ["Esse pato não é seu", "O Gemini recusou a chave. Ela pode ter sido colada errada, com espaço sobrando, ou foi desativada no AI Studio.", "key"],
     sem_conexao: ["O pato se perdeu", "Não foi possível falar com o Gemini. Confira se a internet está ligada e tente de novo.", "lost"],
     limite: ["O pato precisa descansar", "O limite de uso gratuito do Gemini foi atingido por agora. Espere alguns minutos e tente de novo.", "sleep"],
@@ -64,7 +64,7 @@ App.register("error", (() => {
         ${needsKey ? `<form id="err-key-form" class="row wrap" style="gap:8px;justify-content:center;width:min(520px,100%)">
             <label class="sr-only" for="err-key">Chave do Gemini</label>
             <input id="err-key" class="input" type="password" placeholder="Cole a chave que começa com AIza…" autocomplete="off" spellcheck="false" style="flex:1 1 260px">
-            <button type="submit" class="btn btn-primary">Usar e tentar de novo</button></form>
+            <button type="submit" class="btn btn-primary">Salvar e tentar de novo</button></form>
           <button type="button" class="link-go" data-url="https://aistudio.google.com/app/apikey">Criar ou ver minhas chaves no Google AI Studio${icon("ext", 15)}</button>`
         : `<div class="row wrap" style="gap:10px;justify-content:center">
             <button type="button" class="btn btn-primary" id="err-retry">${icon("refresh", 17)}Tentar de novo</button>

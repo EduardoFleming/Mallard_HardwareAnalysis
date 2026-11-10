@@ -1,6 +1,6 @@
 # Mallard · HardwareAnalysis
 
-Aplicativo desktop para ler informações reais do computador, acompanhar sensores e receber recomendações de upgrade com ajuda do Gemini. O novo frontend do Mallard é HTML/CSS/JavaScript dentro de uma janela PyWebview; as leituras e ações são atendidas pelo backend Python do HardwareAnalysis.
+Aplicativo desktop para ler informações reais do computador, acompanhar sensores e receber recomendações de upgrade com ajuda do Gemini. O frontend Mallard é HTML/CSS/JavaScript dentro de uma janela PyWebview; as leituras e ações são atendidas pelo backend Python.
 
 ## Recursos
 
@@ -11,6 +11,12 @@ Aplicativo desktop para ler informações reais do computador, acompanhar sensor
 - Consultor por perfil de uso, orçamento e preferências. Uma solicitação Gemini é feita somente ao clicar para analisar.
 - Resultado detalhado, recomendações, histórico persistente, marcação de upgrades e exportação de relatório HTML.
 - Temas, redução de movimento e preferências persistidos localmente.
+- Simulador de upgrades, verificação de jogos/programas e Diário do PC.
+- Ferramentas para limpeza, inicialização do Windows, temperaturas e bateria.
+- Avisos na bandeja e mini-modo.
+- Simulador local de upgrades, verificação de requisitos de jogos/programas e Diário do PC.
+- Ferramentas Windows para limpeza, inicialização, temperaturas/ventoinhas e saúde da bateria.
+- Avisos opcionais na bandeja e mini-modo.
 
 Os desenhos do mascote, analogias, explicações e temas são conteúdo estático da interface. Métricas, componentes, análises e histórico vêm do computador, do usuário ou do backend Gemini; não há modo de demonstração no aplicativo.
 
@@ -30,17 +36,17 @@ O `app.py` verifica e instala as dependências necessárias usando o mesmo inter
 
 ## Instalador Windows
 
-### [⬇ Baixar Mallard para Windows (64 bits)](https://github.com/EduardoFleming/Mallard_HardwareAnalysis/releases/latest/download/Mallard-Setup-3.0.0.exe)
+### [⬇ Baixar Mallard 4.1 para Windows (64 bits)](https://github.com/EduardoFleming/Mallard_HardwareAnalysis/releases/latest/download/Mallard-Setup-4.1.0.exe)
 
 Baixe e abra o Setup para instalar. Ele cria atalhos no Menu Iniciar e, se o WebView2 estiver ausente, oferece baixá-lo durante a instalação. Depois disso, o Mallard abre como um aplicativo normal; não é necessário instalar Python, Git ou VS Code.
 
-O instalador atual foi gerado para Windows x64 e testado por instalação, abertura e desinstalação. Ele ainda não tem assinatura digital, então o SmartScreen pode exibir um aviso ao abrir até que o programa seja assinado por um certificado de publicação confiável. Os scripts e arquivos usados para construir o instalador ficam somente no checkout local e são ignorados pelo Git; o repositório contém o código-fonte do aplicativo, não os auxiliares de build nem o binário do instalador.
+O instalador atual é gerado para Windows x64 e o Setup 4.1.0 foi testado por instalação, abertura e desinstalação. Ele ainda não tem assinatura digital, então o SmartScreen pode exibir um aviso ao abrir até que o programa seja assinado por um certificado de publicação confiável. Os scripts e arquivos usados para construir o instalador ficam somente no checkout local e são ignorados pelo Git; o repositório contém o código-fonte do aplicativo, não os auxiliares de build nem o binário do instalador. O link de download funciona depois que o Setup é anexado a uma GitHub Release.
 
-O instalador não inclui sua chave Gemini, seu histórico nem suas preferências; cada usuário informa a própria chave, e saves existentes permanecem na pasta de dados do usuário durante atualizações e desinstalações. Se o histórico antigo estiver na pasta isolada do Python da Microsoft Store, o primeiro início copia `config.json` e `historico.json` para `%APPDATA%\Mallard`, sem apagar os originais.
+O instalador não inclui sua chave Gemini, seu histórico nem suas preferências; cada usuário informa a própria chave, e saves existentes permanecem na pasta de dados do usuário durante atualizações e desinstalações. Se o histórico antigo estiver na pasta isolada do Python da Microsoft Store, o primeiro início copia `config.json`, `historico.json` e `journal.json` para `%APPDATA%\Mallard`, sem apagar os originais.
 
 ## Chave do Gemini
 
-Crie uma chave no [Google AI Studio](https://aistudio.google.com/app/apikey) e informe-a no Consultor. Opcionalmente, configure `GEMINI_API_KEY` no ambiente antes de abrir o app. A chave fornecida na interface fica apenas na memória durante a sessão e nunca é salva junto às preferências ou ao histórico.
+Crie uma chave no [Google AI Studio](https://aistudio.google.com/app/apikey) e informe-a em Configurações ou no Consultor. No Windows, a chave é salva como `gemini-key.dpapi` em `%APPDATA%\Mallard`, criptografada pelo DPAPI e vinculada à conta Windows atual; outros usuários do computador não conseguem descriptografá-la. Ela nunca é salva em `config.json`, no histórico ou dentro do repositório. O botão “Esquecer” remove a cópia protegida. Opcionalmente, configure `GEMINI_API_KEY` no ambiente antes de abrir o app; essa variável tem precedência sobre a chave salva. Em sistemas onde DPAPI não está disponível, a chave fica somente na memória até o app ser fechado.
 
 O modelo é `gemini-3.5-flash-lite`, mantido da configuração atual do HardwareAnalysis. Cada clique no botão de análise faz, no máximo, uma chamada ao Gemini; o aplicativo não consulta a IA em segundo plano. Se o serviço informar limite de uso, a interface mostra a espera solicitada.
 
@@ -48,7 +54,7 @@ Ao pedir uma análise, os componentes detectados e as preferências preenchidas 
 
 ## Dados locais
 
-Preferências, temas, conquistas e componentes informados manualmente são guardados em `config.json`; o histórico de análises fica em `historico.json`. Ambos ficam na pasta de configuração do usuário: `%APPDATA%\Mallard` no Windows ou `~/.config/Mallard` no Linux/macOS. Esses saves não são criados dentro do repositório. A chave Gemini nunca é armazenada nesses arquivos.
+Preferências, temas, conquistas e componentes informados manualmente são guardados em `config.json`; o histórico de análises fica em `historico.json`; o diário de uso fica em `journal.json`. Esses dados ficam na pasta de configuração do usuário: `%APPDATA%\Mallard` no Windows ou `~/.config/Mallard` no Linux/macOS. Não são criados dentro do repositório. A chave Gemini nunca é armazenada nesses arquivos.
 
 O `.gitignore` também exclui esses nomes caso arquivos locais sejam colocados na pasta do projeto. O `upload.bat` confere se saves já rastreados pelo Git impediriam essa proteção e pede confirmação explícita antes de preparar commit e push. O `.gitignore` não remove arquivos que já tenham sido enviados anteriormente; confira o histórico do repositório antes de compartilhar dados antigos.
 
@@ -69,6 +75,9 @@ Não compartilhe `config.json` ou `historico.json`: o histórico pode conter com
 - `pcHealth.py`, `hardwareGuide.py`: classificação simples e explicações vinculadas à leitura.
 - `aiAnalysis.py`: chamada Gemini, regras do consultor e validação de resposta.
 - `analysisHistory.py`, `settingsStore.py`, `reportExport.py`: dados locais, preferências e exportação.
+- `gameCheck.py`, `upgradeSimulator.py`, `usageJournal.py`, `upgradeCompare.py`: Vai rodar?, Simulador, Diário e Antes e depois.
+- `diskCleanup.py`, `startupItems.py`, `temperatureSensors.py`, `batteryInfo.py`: ferramentas locais do Windows.
+- `trayAlerts.py`, `runningPrograms.py`: avisos na bandeja e processos em uso.
 
 ## Publicação
 

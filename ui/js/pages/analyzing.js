@@ -68,7 +68,7 @@ App.register("analyzing", (() => {
     timers.forEach(clearTimeout);
     running = false;
     if (!response.ok) {
-      await App.refreshAi();
+      App.refreshAi();
       if (App.state.page === "analyzing") App.go("error", { code: response.error, message: response.message, retrySeconds: response.retry_seconds || 0 });
       else App.toast("Não deu para concluir a análise.");
       return;

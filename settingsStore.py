@@ -1,8 +1,8 @@
 """Preferências do Mallard salvas em disco.
 
-A chave do Gemini NUNCA é gravada aqui: ela fica só na memória enquanto o app
-está aberto. Este arquivo guarda apenas escolhas de interface e peças que o
-usuário informou à mão.
+A chave do Gemini NUNCA é gravada aqui: no Windows ela fica separada e protegida
+pelo DPAPI para o usuário atual. Este arquivo guarda apenas escolhas de
+interface e peças que o usuário informou à mão.
 """
 
 import json
@@ -17,11 +17,21 @@ DEFAULTS = {
     "tried_themes": [],
     "manual_parts": {},
     "achievements": {},
+    "onboarded": False,
+    "help_seen": {},
+    "tray_alerts": True,
+    "alert_mem": True,
+    "alert_disk": True,
+    "alert_temp": True,
+    "mini_pinned": True,
+    "mini_compact": False,
 }
 
 THEMES = ("mallard", "pekin", "femea", "cinzento", "cayuga", "patinho")
 MANUAL_PARTS = ("gpu", "mb")
 ACHIEVEMENTS = ("cisne", "ninho")
+HELP_PAGES = ("simulator", "gamecheck", "journal", "startup", "battery", "cleanup", "temperature")
+FLAGS = ("tray_alerts", "alert_mem", "alert_disk", "alert_temp", "mini_pinned", "mini_compact")
 
 
 def _config_path():
@@ -52,7 +62,7 @@ def _migrate_store_python_saves(destination):
         key=lambda path: path.stat().st_mtime,
         reverse=True,
     )
-    for name in ("config.json", "historico.json"):
+    for name in ("config.json", "historico.json", "journal.json"):
         target = destination / name
         if target.exists():
             continue
@@ -74,7 +84,7 @@ def _clean(data):
         return settings
     if data.get("theme") in THEMES:
         settings["theme"] = data["theme"]
-    for field in ("reduce_motion", "unlocked_1972"):
+    for field in ("reduce_motion", "unlocked_1972") + FLAGS:
         if isinstance(data.get(field), bool):
             settings[field] = data[field]
     if isinstance(data.get("tried_themes"), list):
@@ -88,6 +98,13 @@ def _clean(data):
     if isinstance(data.get("achievements"), dict):
         settings["achievements"] = {
             key: True for key, value in data["achievements"].items() if key in ACHIEVEMENTS and value is True
+        }
+    if isinstance(data.get("onboarded"), bool):
+        settings["onboarded"] = data["onboarded"]
+    if isinstance(data.get("help_seen"), dict):
+        settings["help_seen"] = {
+            key: True for key, value in data["help_seen"].items()
+            if key in HELP_PAGES and value is True
         }
     if settings["theme"] == "patinho" and not settings["unlocked_1972"]:
         settings["theme"] = "mallard"
