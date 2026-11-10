@@ -19,7 +19,7 @@ WizardStyle=modern
 PrivilegesRequired=lowest
 ArchitecturesInstallIn64BitMode=x64compatible
 ArchitecturesAllowed=x64compatible
-UninstallDisplayIcon={app}\{#AppExeName}
+UninstallDisplayIcon={app}\Mallard.ico
 SetupIconFile=..\build-assets\Mallard.ico
 SetupLogging=yes
 
@@ -31,10 +31,11 @@ Name: "desktopicon"; Description: "Criar um atalho na Área de Trabalho"; GroupD
 
 [Files]
 Source: "..\dist\Mallard.exe"; DestDir: "{app}"; Flags: ignoreversion
+Source: "..\build-assets\Mallard.ico"; DestDir: "{app}"; Flags: ignoreversion
 
 [Icons]
-Name: "{autoprograms}\Mallard"; Filename: "{app}\{#AppExeName}"; WorkingDir: "{app}"; IconFilename: "{app}\{#AppExeName}"
-Name: "{autodesktop}\Mallard"; Filename: "{app}\{#AppExeName}"; WorkingDir: "{app}"; IconFilename: "{app}\{#AppExeName}"; Tasks: desktopicon
+Name: "{autoprograms}\Mallard"; Filename: "{app}\{#AppExeName}"; WorkingDir: "{app}"; IconFilename: "{app}\Mallard.ico"
+Name: "{autodesktop}\Mallard"; Filename: "{app}\{#AppExeName}"; WorkingDir: "{app}"; IconFilename: "{app}\Mallard.ico"; Tasks: desktopicon
 
 [Run]
 Filename: "{app}\{#AppExeName}"; Description: "Abrir Mallard"; Flags: postinstall nowait skipifsilent
@@ -82,6 +83,10 @@ begin
 end;
 
 procedure CurUninstallStepChanged(CurUninstallStep: TUninstallStep);
+var
+  FindRec: TFindRec;
+  PackagesPath: String;
+  LegacyMallardPath: String;
 begin
   if CurUninstallStep = usUninstall then
   begin
@@ -90,6 +95,26 @@ begin
       'Isso remove preferências, histórico, diário e a chave Gemini salva. Esta ação não pode ser desfeita.',
       mbConfirmation, MB_YESNO or MB_DEFBUTTON2
     ) = IDYES then
+    begin
       DelTree(ExpandConstant('{userappdata}\Mallard'), True, True, True);
+      { Remove also older saves copied out of Microsoft Store Python sandboxes,
+        or the next install would migrate them back after the user chose Delete. }
+      PackagesPath := AddBackslash(ExpandConstant('{localappdata}')) + 'Packages';
+      if FindFirst(AddBackslash(PackagesPath) + 'PythonSoftwareFoundation.Python.*', FindRec) then
+      begin
+        try
+          repeat
+            if (FindRec.Attributes and FILE_ATTRIBUTE_DIRECTORY) <> 0 then
+            begin
+              LegacyMallardPath := AddBackslash(PackagesPath) + FindRec.Name + '\LocalCache\Roaming\Mallard';
+              if DirExists(LegacyMallardPath) then
+                DelTree(LegacyMallardPath, True, True, True);
+            end;
+          until not FindNext(FindRec);
+        finally
+          FindClose(FindRec);
+        end;
+      end;
+    end;
   end;
 end;

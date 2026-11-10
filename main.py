@@ -585,7 +585,11 @@ def run_app():
     )
     api._window.events.closed += api._on_main_closed
     api._start_tray()
-    webview.start(debug=os.environ.get("HARDWARE_ANALYSIS_DEBUG") == "1", http_server=False)
+    webview.start(
+        debug=os.environ.get("HARDWARE_ANALYSIS_DEBUG") == "1",
+        http_server=False,
+        icon=resource_path("build-assets", "Mallard.ico"),
+    )
     return 0
 
 

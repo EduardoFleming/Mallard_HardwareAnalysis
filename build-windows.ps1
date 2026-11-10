@@ -5,6 +5,7 @@ $venv = Join-Path $PSScriptRoot ".venv-build"
 $python = Join-Path $venv "Scripts\python.exe"
 $dist = Join-Path $PSScriptRoot "dist"
 $assets = Join-Path $PSScriptRoot "build-assets"
+$ui = Join-Path $PSScriptRoot "ui"
 $work = Join-Path $PSScriptRoot "build\pyinstaller"
 $spec = Join-Path $PSScriptRoot "Mallard.spec"
 
@@ -26,6 +27,7 @@ $icon = Join-Path $assets "Mallard.ico"
 if (-not (Test-Path $assets)) { New-Item -ItemType Directory -Path $assets | Out-Null }
 & $python (Join-Path $PSScriptRoot "generateIcon.py") $icon
 if ($LASTEXITCODE -ne 0 -or -not (Test-Path $icon)) { throw "Não foi possível gerar o ícone do Mallard." }
+Copy-Item -Path $icon -Destination (Join-Path $ui "Mallard.ico") -Force
 
 Write-Host "Empacotando Mallard com PyInstaller..."
 & $python -c "import webview" 2>$null

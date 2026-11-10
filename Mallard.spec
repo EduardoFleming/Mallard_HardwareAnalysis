@@ -5,7 +5,12 @@ from pathlib import Path
 from PyInstaller.utils.hooks import collect_all
 
 ROOT = Path(SPECPATH)
-datas = [(str(ROOT / "ui"), "ui")]
+# O ícone do executável é embutido pelo PyInstaller; também o inclui como dado
+# para o PyWebView carregar o mesmo ícone nativo da janela em Windows.
+datas = [
+    (str(ROOT / "ui"), "ui"),
+    (str(ROOT / "build-assets" / "Mallard.ico"), "build-assets"),
+]
 binaries = []
 hiddenimports = []
 
@@ -77,3 +82,7 @@ exe = EXE(
     codesign_identity=None,
     entitlements_file=None,
 )
+
+# Put the application icon resource first in the Windows executable; this is
+# the icon Explorer and the taskbar use when extracting from the module.
+exe.icon = str(ROOT / "build-assets" / "Mallard.ico")
