@@ -37,6 +37,7 @@
 @media (max-width: 1480px) {
   .topbar { grid-template-columns: minmax(0, 1fr) auto; grid-template-areas: "brand controls" "tabs tabs"; row-gap: 4px; }
   .tabs { justify-content: flex-start; flex-wrap: wrap; gap: 2px 4px; }
+  .tab.active { background: var(--acc); color: var(--on-acc); box-shadow: 0 0 0 1px var(--acc-text), 0 2px 8px var(--acc-glow); }
   .tools-menu { left: auto; right: 0; transform: none; max-width: calc(100vw - 28px); }
 }
 @media (max-width: 760px) {
@@ -56,7 +57,7 @@
 }
 
 /* ---------- Ajuda (balões que apontam para a tela) ---------- */
-.help-layer { position: fixed; inset: 64px 0 0 0; z-index: 40; background: rgba(0,0,0,.45); }
+.help-layer { position: fixed; inset: var(--help-top, 64px) 0 0 0; z-index: 40; background: rgba(0,0,0,.45); }
 .help-layer[hidden] { display: none; }
 .help-card {
   position: absolute; right: clamp(16px, 3vw, 44px); top: 18px; width: min(380px, calc(100% - 32px)); padding: 18px 18px 16px;

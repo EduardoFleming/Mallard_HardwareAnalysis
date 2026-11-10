@@ -35,11 +35,17 @@ const Help = (() => {
     Bridge.call("save_settings", { help_seen: seen }).catch(() => {});
   }
 
+  function positionLayer() {
+    const topbar = document.getElementById("topbar");
+    if (topbar) layer().style.setProperty("--help-top", `${Math.ceil(topbar.getBoundingClientRect().bottom)}px`);
+  }
+
   function open(page) {
     const entry = TEXTS[page || App.state.page];
     if (!entry) return;
     current = page || App.state.page;
     const [title, steps] = entry;
+    positionLayer();
     layer().innerHTML = `<div class="help-card in" role="dialog" aria-label="Ajuda: ${esc(title)}">
       <div class="row" style="justify-content:space-between"><span class="label">Como usar · ${esc(title)}</span>
         <button type="button" class="round-btn" id="help-close" aria-label="Fechar ajuda" style="width:30px;height:30px">${icon("x", 15)}</button></div>
@@ -63,6 +69,7 @@ const Help = (() => {
 
   document.addEventListener("DOMContentLoaded", () => {
     button().addEventListener("click", () => { if (layer().hidden) open(); else close(); });
+    window.addEventListener("resize", () => { if (!layer().hidden) positionLayer(); });
   });
 
   return { open, close, onPage };
