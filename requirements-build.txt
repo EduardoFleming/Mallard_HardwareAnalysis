@@ -1,0 +1,9 @@
+pyinstaller>=6.0,<7
+pywebview>=5.0,<7
+psutil>=5.9,<8
+google-genai>=1.48,<2
+nvidia-ml-py>=12,<14
+wmi>=1.5,<2; platform_system == "Windows"
+pywin32>=306; platform_system == "Windows"
+pystray>=0.19,<1; platform_system == "Windows"
+Pillow>=10,<13; platform_system == "Windows"

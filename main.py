@@ -71,7 +71,7 @@ import usageJournal
 
 
 APP_NAME = "Mallard"
-APP_VERSION = "4.1"
+APP_VERSION = "4.1.1"
 _HARDWARE_CACHE_SECONDS = 30
 _MINI_SIZE = {"full": (340, 428), "compact": (340, 104)}
 

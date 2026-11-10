@@ -12,13 +12,9 @@ env/
 build/
 dist/
 release/
-Mallard.spec
-*.spec
-build-windows.ps1
-requirements-build.txt
-installer/
+build-assets/Mallard.ico
 
-# Auxiliares/artefatos do instalador (mantidos só no checkout de build)
+# Auxiliares/artefatos binários do instalador
 Mallard-Setup-*.exe
 
 # Segredos locais

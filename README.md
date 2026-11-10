@@ -36,13 +36,15 @@ O `app.py` verifica e instala as dependências necessárias usando o mesmo inter
 
 ## Instalador Windows
 
-### [⬇ Baixar Mallard 4.1 para Windows (64 bits)](https://github.com/EduardoFleming/Mallard_HardwareAnalysis/releases/latest/download/Mallard-Setup-4.1.0.exe)
+### [⬇ Baixar Mallard 4.1.1 para Windows (64 bits)](https://github.com/EduardoFleming/Mallard_HardwareAnalysis/releases/latest/download/Mallard-Setup-4.1.1.exe)
 
 Baixe e abra o Setup para instalar. Ele cria atalhos no Menu Iniciar e, se o WebView2 estiver ausente, oferece baixá-lo durante a instalação. Depois disso, o Mallard abre como um aplicativo normal; não é necessário instalar Python, Git ou VS Code.
 
-O instalador atual é gerado para Windows x64 e o Setup 4.1.0 foi testado por instalação, abertura e desinstalação. Ele ainda não tem assinatura digital, então o SmartScreen pode exibir um aviso ao abrir até que o programa seja assinado por um certificado de publicação confiável. Os scripts e arquivos usados para construir o instalador ficam somente no checkout local e são ignorados pelo Git; o repositório contém o código-fonte do aplicativo, não os auxiliares de build nem o binário do instalador. O link de download funciona depois que o Setup é anexado a uma GitHub Release.
+O instalador atual é gerado para Windows x64. O Setup pergunta se deve apagar os dados do usuário ao desinstalar (a opção padrão é preservar). Ele usa o ícone do pato Mallard no aplicativo e nos atalhos. O instalador ainda não tem assinatura digital, então o SmartScreen pode exibir um aviso até que o programa seja assinado por um certificado de publicação confiável. Os scripts de build e o código gerador do ícone são mantidos no repositório para permitir builds reproduzíveis; executáveis, instaladores, ícones compilados e dados locais de usuário não são enviados. O link de download funciona depois que o Setup é anexado a uma GitHub Release.
 
-O instalador não inclui sua chave Gemini, seu histórico nem suas preferências; cada usuário informa a própria chave, e saves existentes permanecem na pasta de dados do usuário durante atualizações e desinstalações. Se o histórico antigo estiver na pasta isolada do Python da Microsoft Store, o primeiro início copia `config.json`, `historico.json` e `journal.json` para `%APPDATA%\Mallard`, sem apagar os originais.
+O instalador não inclui sua chave Gemini, seu histórico nem suas preferências; cada usuário informa a própria chave, e saves existentes permanecem na pasta de dados do usuário durante atualizações. Ao desinstalar, o Setup pergunta se deseja apagá-los; manter os dados é a opção padrão. Se o histórico antigo estiver na pasta isolada do Python da Microsoft Store, o primeiro início copia `config.json`, `historico.json` e `journal.json` para `%APPDATA%\Mallard`, sem apagar os originais.
+
+O atalho, o executável e o Setup usam o ícone do pato Mallard, gerado localmente a partir do desenho da marca.
 
 ## Chave do Gemini
 
